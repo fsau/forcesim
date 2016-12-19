@@ -15,4 +15,4 @@ If a particular force requires some particle property (for example, charge), one
 
 ### Running
 
-To run the simulator, just put every files on the same folder and run `octave -qf ./myplot.m` there. It will compile the code, run it and plot it automatically.
+To run the simulator, just put every files on the same folder and run `octave -qf ./myplot.m` there. It will compile the code, run it and plot it automatically. To print GIF you need Imagemagick and Gifsicle installed on your system.
