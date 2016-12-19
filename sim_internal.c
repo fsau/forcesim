@@ -1,9 +1,12 @@
+double zero_vec[dim] = {0};
+
 struct Particle
 {
 	int id;
 	double pos[dim];
 	double vel[dim];
 	double mass;
+	double radius;
 	bool fixed;
 };
 
@@ -11,12 +14,15 @@ struct point_system
 {
 	int particleN;
 	int forceN;
+	int modifierN;
 	double time;
 	struct Particle Bodies[maxParticles];
 	void (*Forces[maxForces])(double*, struct Particle, struct Particle);
+	void (*Modifiers[maxModifiers])(struct Particle*, struct Particle*);
 };
 
-void initSystem(struct point_system *system)
+void
+initSystem(struct point_system *system)
 {
 	(*system).time = 0;
 
@@ -34,13 +40,21 @@ void initSystem(struct point_system *system)
 			++(*system).forceN;
 	}
 
+	(*system).modifierN = 0;
+	for (int i = 0; i < maxModifiers; ++i)
+	{
+		if((*system).Modifiers[i] != NULL)
+			++(*system).modifierN;
+	}
+
 	for (int i = 0; i < (*system).particleN; i++)
 	{
 		(*system).Bodies[i].id = i;
 	}
 }
 
-void sum_vec(double *c, double *a, double *b, double multiplier_constant)
+void
+sum_vec(double *c, double *a, double *b, double multiplier_constant)
 {
 	for(int i = 0; i < dim; i++)
 	{
@@ -48,34 +62,35 @@ void sum_vec(double *c, double *a, double *b, double multiplier_constant)
 	}
 }
 
-double r_abs(double *radius)
+double
+dot_product(double *a, double *b)
 {
-	double norm = 0;
+	double cnt = 0;
 	for(int i = 0; i < dim; i++)
 	{
-		norm += radius[i]*radius[i];
+		cnt += a[i]*b[i];
 	}
-	return sqrt(norm);
+	return cnt;
 }
 
-#define grav_c 1
-void grav_force(double *force, struct Particle particle_0, struct Particle particle_1)
+double
+r_abs(double *radius)
 {
-	if(particle_0.id == particle_1.id) return;
+	return sqrt(dot_product(radius, radius));
+}
 
-	double r_01[dim];
-	
-	sum_vec(r_01, particle_1.pos, particle_0.pos, -1);
-
-	double dist = r_abs(r_01);
-	
+void
+r_norm(double *b, double *a)
+{
+	double norm = r_abs(a);
 	for(int i = 0; i < dim; i++)
 	{
-		force[i] = force[i] + grav_c * particle_0.mass * particle_1.mass * r_01[i] / pow(dist, 3);
+		b[i] = a[i]/norm;
 	}
 }
 
-void calc_system(struct point_system *mysystem, double dt)
+void
+calc_system(struct point_system *mysystem, double dt)
 {
 	for(int i = 0; i < (*mysystem).particleN; i++)
 	{
@@ -93,6 +108,11 @@ void calc_system(struct point_system *mysystem, double dt)
 			{
 				(*mysystem).Forces[k](force, (*mysystem).Bodies[i], (*mysystem).Bodies[j]);
 			}
+
+			for(int k = 0; k < (*mysystem).modifierN; k++)
+			{
+				(*mysystem).Modifiers[k](&(*mysystem).Bodies[i], &(*mysystem).Bodies[j]);
+			}
 		}
 		
 		sum_vec((*mysystem).Bodies[i].vel, (*mysystem).Bodies[i].vel, force, dt/(*mysystem).Bodies[i].mass);
@@ -102,7 +122,8 @@ void calc_system(struct point_system *mysystem, double dt)
 	(*mysystem).time += dt;
 }
 
-void print_system(struct point_system system)
+void
+print_system(struct point_system system)
 {
 	printf("%lf", system.time);
 	
@@ -114,30 +135,4 @@ void print_system(struct point_system system)
 		}
 	}
 	printf("\n");
-}
-
-// Idea:
-// dt = dt0 * min(dist/vel) where dt0 << 1, so that vel*dt << dist
-double dynamic_dt(struct point_system system)
-{
-	double dt = maxTimeStep;
-
-	for (int i = 0; i < system.particleN; i++)
-	{
-		if(system.Bodies[i].fixed == false)
-		{
-			double vel = r_abs(system.Bodies[i].vel);
-			for (int j = 0; j < system.particleN; j++)
-			{
-				if(i == j) break;
-				double rad[dim], dist;
-				sum_vec(rad, system.Bodies[i].pos, system.Bodies[j].pos, -1);
-				dist = r_abs(rad);
-				if(dt0*dist/vel < dt)
-					dt = dt0*dist/vel;
-			}
-		}
-	}
-
-	return fmax(dt, minTimeStep);
 }

@@ -32,7 +32,7 @@ if cgif == 1
 	if isempty(findall(0,'Type','Figure'))
 		figure()
 	end
-	
+
 	clf;
 	disp("Click on figure to plot..."); fflush(stdout);
 	waitforbuttonpress();
@@ -49,11 +49,9 @@ if cgif == 1
 	end
 
 	hold on
-
 	for i = 1:n
 		plot(data(:,2*i),data(:,2*i+1),"color", mycmap(i,:), "linewidth", 1);
 	end
-
 	hold off
 end
 
