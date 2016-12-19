@@ -136,3 +136,28 @@ print_system(struct point_system system)
 	}
 	printf("\n");
 }
+
+// dt = dt0 * min(dist/vel) where dt0 << 1, so that vel*dt << dist
+double
+dynamic_dt(struct point_system system)
+{
+	double dt = maxTimeStep;
+
+	for (int i = 0; i < system.particleN; i++)
+	{
+		if(system.Bodies[i].fixed == false)
+		{
+			double vel = r_abs(system.Bodies[i].vel);
+			for (int j = 0; j < system.particleN; j++)
+			{
+				if(i == j) break;
+				double rad[dim], dist;
+				sum_vec(rad, system.Bodies[i].pos, system.Bodies[j].pos, -1);
+				dist = r_abs(rad);
+				if(dt0*dist/vel < dt)
+					dt = dt0*dist/vel;
+			}
+		}
+	}
+	return fmax(dt, minTimeStep);
+}

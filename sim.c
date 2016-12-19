@@ -107,46 +107,18 @@ collision(struct Particle *particle_0, struct Particle *particle_1)
 	if(dist < (*particle_0).radius + (*particle_1).radius)
 	{
 		r_norm(r_01, r_01);
-		
+
 		double proj0, proj1, vcm;
 
 		proj0 = dot_product((*particle_0).vel, r_01);
 		proj1 = dot_product((*particle_1).vel, r_01);
 
-		sum_vec((*particle_0).vel, (*particle_0).vel, r_01, -proj0);
-		sum_vec((*particle_1).vel, (*particle_1).vel, r_01, -proj1);
+		if(proj0 < proj1) return;
 
 		vcm = (proj0 * (*particle_0).mass + proj1 * (*particle_1).mass)/
 		((*particle_0).mass + (*particle_1).mass);
-		proj0 = 2*vcm - proj0;
-		proj1 = 2*vcm - proj1;
 
-		sum_vec((*particle_0).vel, (*particle_0).vel, r_01, proj0);
-		sum_vec((*particle_1).vel, (*particle_1).vel, r_01, proj1);
+		sum_vec((*particle_0).vel, (*particle_0).vel, r_01, 2*vcm - 2*proj0);
+		sum_vec((*particle_1).vel, (*particle_1).vel, r_01, 2*vcm - 2*proj1);
 	}
-}
-
-// dt = dt0 * min(dist/vel) where dt0 << 1, so that vel*dt << dist
-double
-dynamic_dt(struct point_system system)
-{
-	double dt = maxTimeStep;
-
-	for (int i = 0; i < system.particleN; i++)
-	{
-		if(system.Bodies[i].fixed == false)
-		{
-			double vel = r_abs(system.Bodies[i].vel);
-			for (int j = 0; j < system.particleN; j++)
-			{
-				if(i == j) break;
-				double rad[dim], dist;
-				sum_vec(rad, system.Bodies[i].pos, system.Bodies[j].pos, -1);
-				dist = r_abs(rad);
-				if(dt0*dist/vel < dt)
-					dt = dt0*dist/vel;
-			}
-		}
-	}
-	return fmax(dt, minTimeStep);
 }
