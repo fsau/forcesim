@@ -26,7 +26,9 @@ baseaxis = [min(min(data(:,[2:2:end]))),max(max(data(:,[2:2:end]))),...
 min(min(data(:,[3:2:end]))),max(max(data(:,[3:2:end])))];
 mycmap = colormap(lines);
 
-disp("Done. Plotting..."); fflush(stdout);
+clf;
+disp("Done. Click figure to plot..."); fflush(stdout);
+waitforbuttonpress();
 
 i = 1;
 tic;
