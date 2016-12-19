@@ -71,6 +71,13 @@ if cgif == 2
 	system("for i in $(ls ./output/*.png); do convert $i $i.gif; rm $i; done");
 	system("gifsicle --delay=3 $(ls -v1 ./output/*.gif) > output.gif");
 	system("rm -r ./output");
+
+	hold on
+	for i = 1:n
+		plot(data(:,2*i),data(:,2*i+1),"color", mycmap(i,:), "linewidth", 1);
+	end
+	hold off
+	print("-r0", "output-curve.png");
 end
 
 disp("Done!")
