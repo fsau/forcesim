@@ -13,6 +13,8 @@ The `myplot.m` is a Octave script that creates an animated real-time plot of the
 
 If a particular force requires some particle property (for example, charge), one can easily add it to the Particle struct and include it on the system.
 
+The modifiers are _generalized forces_ which can alter directly the particle properties as speed, position, etc. That's useful for collisions and similar processes which are easily described analytically but aren't very easy to implement only with forces.
+
 ### Running
 
 To run the simulator, just put every files on the same folder and run `octave -qf ./myplot.m` there. It will compile the code, run it and plot it automatically. To print GIF you need Imagemagick and Gifsicle installed on your system.
