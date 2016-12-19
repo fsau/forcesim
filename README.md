@@ -15,4 +15,4 @@ If a particular force requires some particle property (for example, charge), one
 
 ### Running
 
-To run the simulator, just put every files on the same folder and open your Octave console there. After that, just type `myplot`, it will compile and run the C program automatically, plotting it afterwards.
+To run the simulator, just put every files on the same folder and run `octave -qf ./myplot.m` there. It will compile the code, run it and plot it automatically.
