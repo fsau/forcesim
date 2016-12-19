@@ -29,9 +29,12 @@ mycmap = colormap(lines);
 cgif = menu("Done.", "Plot real-time", "Create GIF file");
 
 if cgif == 1
+	if isempty(findall(0,'Type','Figure'))
+		figure()
+	end
+	
 	clf;
 	disp("Click on figure to plot..."); fflush(stdout);
-	figure();
 	waitforbuttonpress();
 
 	i = 1;
