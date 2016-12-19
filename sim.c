@@ -107,18 +107,7 @@ collision(struct Particle *particle_0, struct Particle *particle_1)
 	if(dist < (*particle_0).radius + (*particle_1).radius)
 	{
 		r_norm(r_01, r_01);
-
-		// double v_perp0[dim], v_para0[dim], proj0,
-		// v_perp1[dim], v_para1[dim], proj1;
-
-		// proj0 = dot_product((*particle_0).vel, r_01);
-		// sum_vec(v_para0, zero_vec, r_01, proj0); // v_para0 = proj0*r_01;
-		// sum_vec(v_perp0, (*particle_0).vel, v_para0, -1);
-
-		// proj1 = dot_product((*particle_1).vel, r_01);
-		// sum_vec(v_para1, zero_vec, r_01, proj1); // v_para0 = proj0*r_01;
-		// sum_vec(v_perp1, (*particle_1).vel, v_para1, -1);
-
+		
 		double proj0, proj1, vcm;
 
 		proj0 = dot_product((*particle_0).vel, r_01);
