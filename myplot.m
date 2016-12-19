@@ -41,4 +41,12 @@ while i < datalength
 	i = round(fps*toc);
 end
 
+hold on
+
+for i = 1:n
+	plot(data(:,2*i),data(:,2*i+1),"color", mycmap(i,:), "linewidth", 1);
+end
+
+hold off
+
 disp("Done!")
