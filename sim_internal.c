@@ -118,9 +118,6 @@ void print_system(struct point_system system)
 
 // Idea:
 // dt = dt0 * min(dist/vel) where dt0 << 1, so that vel*dt << dist
-#define maxTimeStep 0.01
-#define minTimeStep 0.00001
-#define dt0 0.0001
 double dynamic_dt(struct point_system system)
 {
 	double dt = maxTimeStep;

@@ -7,6 +7,10 @@
 #define maxParticles 5
 #define maxForces 3
 
+#define maxTimeStep 0.01
+#define minTimeStep 0.00001
+#define dt0 0.0001
+
 #include "sim_internal.c"
 
 #define tmax 10
