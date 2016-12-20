@@ -5,8 +5,8 @@
 
 #define dim 2
 #define maxParticles 10
-#define maxForces 3
-#define maxModifiers 3
+#define maxForces 5
+#define maxModifiers 5
 
 #define maxTimeStep 1e-2
 #define minTimeStep 1e-6
@@ -18,10 +18,12 @@
 
 double dynamic_dt(struct point_system);
 void grav_force(double *, struct Particle, struct Particle);
-void square_wall(struct Particle *, struct Particle *);
-void collision(struct Particle *, struct Particle *);
 void eletr_force(double *, struct Particle, struct Particle);
 void mag_ext_force(double *, struct Particle, struct Particle);
+void eletr_ext_force(double *, struct Particle, struct Particle);
+void drag_force(double *, struct Particle, struct Particle);
+void square_wall(struct Particle *, struct Particle *);
+void sphere_collision(struct Particle *, struct Particle *);
 
 int
 main(void)
@@ -30,33 +32,33 @@ main(void)
 		.Bodies = {
 			{
 				.pos = {0,0},
-				.vel = {1,-3},
-				.mass = 50,
-				.radius = 0.5,
-				.charge = -10,
-				.fixed = false
-			},
-			{
-				.pos = {-3,-3},
-				.vel = {1,3},
-				.mass = 50,
+				.vel = {0,0},
+				.mass = 10,
 				.radius = 0.5,
 				.charge = 10,
 				.fixed = false
 			},
 			{
-				.pos = {3,0}, 
-				.vel = {-1,-2},
-				.mass = 50,
-				.radius = 0.5,
+				.pos = {3.9,4.1},
+				.vel = {-8,-2},
+				.mass = 10,
+				.radius = 0.1,
 				.charge = -10,
 				.fixed = false
 			},
 			{
-				.pos = {3,2}, 
-				.vel = {-6,0},
-				.mass = 50,
-				.radius = 0.5,
+				.pos = {3,-3}, 
+				.vel = {0,4},
+				.mass = 10,
+				.radius = 0.3,
+				.charge = -10,
+				.fixed = false
+			},
+			{
+				.pos = {-3,3}, 
+				.vel = {0,-4},
+				.mass = 20,
+				.radius = 0.3,
 				.charge = -0,
 				.fixed = false
 			},
@@ -65,10 +67,12 @@ main(void)
 			grav_force,
 			eletr_force,
 			mag_ext_force,
+			eletr_ext_force,
+			drag_force,
 		},
 		.Modifiers = {
 			square_wall,
-			collision,
+			sphere_collision,
 		},
 	};
 
@@ -86,7 +90,7 @@ main(void)
 	}
 }
 
-#define grav_c 0.1
+#define grav_c 1
 void
 grav_force(double *force, struct Particle particle_0, struct Particle particle_1)
 {
@@ -100,11 +104,11 @@ grav_force(double *force, struct Particle particle_0, struct Particle particle_1
 	
 	for(int i = 0; i < dim; i++)
 	{
-		force[i] += + grav_c * particle_0.mass * particle_1.mass * r_01[i] / pow(dist, 3);
+		force[i] += grav_c * particle_0.mass * particle_1.mass * r_01[i] / pow(dist, 3);
 	}
 }
 
-#define eletr_c 1
+#define eletr_c 2
 void
 eletr_force(double *force, struct Particle particle_0, struct Particle particle_1)
 {
@@ -118,18 +122,39 @@ eletr_force(double *force, struct Particle particle_0, struct Particle particle_
 	
 	for(int i = 0; i < dim; i++)
 	{
-		force[i] += eletr_c * particle_0.charge * particle_1.charge * r_01[i] / pow(dist, 3);
+		force[i] -= eletr_c * particle_0.charge * particle_1.charge * r_01[i] / pow(dist, 3);
 	}
 }
 
-#define mag_c 10
+#define mag_ext_c 1
 void
 mag_ext_force(double *force, struct Particle particle_0, struct Particle particle_1)
 {
 	if(particle_0.id != particle_1.id || particle_0.fixed) return;
 
-	force[0] += mag_c * particle_1.charge * particle_0.vel[1];
-	force[1] += - mag_c * particle_1.charge * particle_0.vel[0];
+	force[0] += mag_ext_c * particle_1.charge * particle_0.vel[1];
+	force[1] -= mag_ext_c * particle_1.charge * particle_0.vel[0];
+}
+
+#define eletr_ext_c 20
+void
+eletr_ext_force(double *force, struct Particle particle_0, struct Particle particle_1)
+{
+	if(particle_0.id != particle_1.id || particle_0.fixed) return;
+
+	force[0] += eletr_ext_c * particle_1.charge;
+}
+
+#define drag_c 2
+void
+drag_force(double *force, struct Particle particle_0, struct Particle particle_1)
+{
+	if(particle_0.id != particle_1.id || particle_0.fixed) return;
+
+	for(int i = 0; i < dim; i++)
+	{
+		force[i] -= drag_c*particle_0.vel[i];
+	}
 }
 
 #define topw 5
@@ -155,7 +180,7 @@ square_wall(struct Particle *particle_0, struct Particle *particle_1)
 }
 
 void
-collision(struct Particle *particle_0, struct Particle *particle_1)
+sphere_collision(struct Particle *particle_0, struct Particle *particle_1)
 {
 	if((*particle_0).id >= (*particle_1).id) return;
 

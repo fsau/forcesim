@@ -72,7 +72,7 @@ while cgif != 3
 		set(0, 'defaultfigurevisible', 'on');
 		disp("Done. Converting and creating gif..."); fflush(stdout);
 		system("for i in $(ls ./output/*.png); do convert $i $i.gif; rm $i; done");
-		system(["gifsicle --delay=" num2str(round(100/fps)) " $(ls -v1 ./output/*.gif) > output.gif"]);
+		system(["gifsicle --loop --delay=" num2str(round(100/fps)) " $(ls -v1 ./output/*.gif) > output.gif"]);
 		system("rm -r ./output");
 	end
 end
