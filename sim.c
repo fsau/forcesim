@@ -16,7 +16,6 @@
 
 #define tmax 10
 
-double dynamic_dt(struct point_system);
 void grav_force(double *, struct Particle, struct Particle);
 void eletr_force(double *, struct Particle, struct Particle);
 void mag_ext_force(double *, struct Particle, struct Particle);
