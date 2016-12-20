@@ -7,6 +7,7 @@ struct Particle
 	double vel[dim];
 	double mass;
 	double radius;
+	double charge;
 	bool fixed;
 };
 
@@ -22,7 +23,7 @@ struct point_system
 };
 
 void
-initSystem(struct point_system *system)
+config_system(struct point_system *system)
 {
 	(*system).time = 0;
 

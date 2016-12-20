@@ -20,19 +20,51 @@ double dynamic_dt(struct point_system);
 void grav_force(double *, struct Particle, struct Particle);
 void square_wall(struct Particle *, struct Particle *);
 void collision(struct Particle *, struct Particle *);
+void eletr_force(double *, struct Particle, struct Particle);
+void mag_ext_force(double *, struct Particle, struct Particle);
 
 int
 main(void)
 {
 	struct point_system psystem = {
 		.Bodies = {
-			{.pos = {-3,3}, .vel = {1,-3}, .mass = 50, .radius = 0.5, .fixed = false},
-			{.pos = {-3,-3}, .vel = {1,-1}, .mass = 50, .radius = 0.5, .fixed = false},
-			{.pos = {3,0}, .vel = {-1,0}, .mass = 50, .radius = 0.5, .fixed = false},
-			{.pos = {0,0}, .vel = {0,0}, .mass = 50, .radius = 0.5, .fixed = true},
+			{
+				.pos = {0,0},
+				.vel = {1,-3},
+				.mass = 50,
+				.radius = 0.5,
+				.charge = -10,
+				.fixed = false
+			},
+			{
+				.pos = {-3,-3},
+				.vel = {1,3},
+				.mass = 50,
+				.radius = 0.5,
+				.charge = 10,
+				.fixed = false
+			},
+			{
+				.pos = {3,0}, 
+				.vel = {-1,-2},
+				.mass = 50,
+				.radius = 0.5,
+				.charge = -10,
+				.fixed = false
+			},
+			{
+				.pos = {3,2}, 
+				.vel = {-6,0},
+				.mass = 50,
+				.radius = 0.5,
+				.charge = -0,
+				.fixed = false
+			},
 		},
 		.Forces = {
 			grav_force,
+			eletr_force,
+			mag_ext_force,
 		},
 		.Modifiers = {
 			square_wall,
@@ -40,7 +72,7 @@ main(void)
 		},
 	};
 
-	initSystem(&psystem);
+	config_system(&psystem);
 
 	printf("%d ", psystem.particleN);
 	print_system(psystem);
@@ -54,7 +86,7 @@ main(void)
 	}
 }
 
-#define grav_c 0.2
+#define grav_c 0.1
 void
 grav_force(double *force, struct Particle particle_0, struct Particle particle_1)
 {
@@ -68,8 +100,36 @@ grav_force(double *force, struct Particle particle_0, struct Particle particle_1
 	
 	for(int i = 0; i < dim; i++)
 	{
-		force[i] = force[i] + grav_c * particle_0.mass * particle_1.mass * r_01[i] / pow(dist, 3);
+		force[i] += + grav_c * particle_0.mass * particle_1.mass * r_01[i] / pow(dist, 3);
 	}
+}
+
+#define eletr_c 1
+void
+eletr_force(double *force, struct Particle particle_0, struct Particle particle_1)
+{
+	if(particle_0.id == particle_1.id || particle_0.fixed) return;
+
+	double r_01[dim];
+	
+	sum_vec(r_01, particle_1.pos, particle_0.pos, -1);
+
+	double dist = r_abs(r_01);
+	
+	for(int i = 0; i < dim; i++)
+	{
+		force[i] += eletr_c * particle_0.charge * particle_1.charge * r_01[i] / pow(dist, 3);
+	}
+}
+
+#define mag_c 10
+void
+mag_ext_force(double *force, struct Particle particle_0, struct Particle particle_1)
+{
+	if(particle_0.id != particle_1.id || particle_0.fixed) return;
+
+	force[0] += mag_c * particle_1.charge * particle_0.vel[1];
+	force[1] += - mag_c * particle_1.charge * particle_0.vel[0];
 }
 
 #define topw 5
