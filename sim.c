@@ -4,7 +4,7 @@
 #include <math.h>
 
 #define dim 2
-#define maxParticles 5
+#define maxParticles 10
 #define maxForces 3
 #define maxModifiers 3
 
@@ -14,7 +14,7 @@
 
 #include "sim_internal.c"
 
-#define tmax 30
+#define tmax 10
 
 double dynamic_dt(struct point_system);
 void grav_force(double *, struct Particle, struct Particle);
@@ -26,10 +26,10 @@ main(void)
 {
 	struct point_system psystem = {
 		.Bodies = {
-			{.pos = {0,0}, .vel = {0,1}, .mass = 80, .radius = .5, .fixed = false},
-			{.pos = {3,0}, .vel = {-1,-2}, .mass = 40, .radius = .5, .fixed = false},
-			{.pos = {6,0}, .vel = {3,0}, .mass = 100, .radius = .3, .fixed = false},
-			{.pos = {9,0}, .vel = {-2,3}, .mass = 200, .radius = .2, .fixed = false},
+			{.pos = {-3,3}, .vel = {1,-3}, .mass = 50, .radius = 0.5, .fixed = false},
+			{.pos = {-3,-3}, .vel = {1,-1}, .mass = 50, .radius = 0.5, .fixed = false},
+			{.pos = {3,0}, .vel = {-1,0}, .mass = 50, .radius = 0.5, .fixed = false},
+			{.pos = {0,0}, .vel = {0,0}, .mass = 50, .radius = 0.5, .fixed = true},
 		},
 		.Forces = {
 			grav_force,
@@ -54,11 +54,11 @@ main(void)
 	}
 }
 
-#define grav_c 0.1
+#define grav_c 0.2
 void
 grav_force(double *force, struct Particle particle_0, struct Particle particle_1)
 {
-	if(particle_0.id == particle_1.id) return;
+	if(particle_0.id == particle_1.id || particle_0.fixed) return;
 
 	double r_01[dim];
 	
@@ -74,23 +74,23 @@ grav_force(double *force, struct Particle particle_0, struct Particle particle_1
 
 #define topw 5
 #define bottomw -5
-#define rightw 12
-#define leftw -2
+#define rightw 5
+#define leftw -5
 void 
 square_wall(struct Particle *particle_0, struct Particle *particle_1)
 {
 	if((*particle_0).id != (*particle_1).id) return;
 
-	if((*particle_0).pos[1] > topw && (*particle_0).vel[1] > 0)
+	if((*particle_0).pos[1] + (*particle_0).radius > topw && (*particle_0).vel[1] > 0)
 		(*particle_0).vel[1] *= -1;
 
-	if((*particle_0).pos[0] > rightw && (*particle_0).vel[0] > 0)
+	if((*particle_0).pos[0] + (*particle_0).radius > rightw && (*particle_0).vel[0] > 0)
 		(*particle_0).vel[0] *= -1;
 
-	if((*particle_0).pos[1] < bottomw && (*particle_0).vel[1] < 0)
+	if((*particle_0).pos[1] - (*particle_0).radius < bottomw && (*particle_0).vel[1] < 0)
 		(*particle_0).vel[1] *= -1;
 
-	if((*particle_0).pos[0] < leftw && (*particle_0).vel[0] < 0)
+	if((*particle_0).pos[0] - (*particle_0).radius < leftw && (*particle_0).vel[0] < 0)
 		(*particle_0).vel[0] *= -1;
 }
 
@@ -115,8 +115,15 @@ collision(struct Particle *particle_0, struct Particle *particle_1)
 
 		if(proj0 < proj1) return;
 
-		vcm = (proj0 * (*particle_0).mass + proj1 * (*particle_1).mass)/
-		((*particle_0).mass + (*particle_1).mass);
+		if(!(*particle_0).fixed && !(*particle_1).fixed)
+		{
+			vcm = (proj0 * (*particle_0).mass + proj1 * (*particle_1).mass)/
+			((*particle_0).mass + (*particle_1).mass);
+		}
+		else
+		{
+			vcm = 0;
+		}
 
 		sum_vec((*particle_0).vel, (*particle_0).vel, r_01, 2*vcm - 2*proj0);
 		sum_vec((*particle_1).vel, (*particle_1).vel, r_01, 2*vcm - 2*proj1);

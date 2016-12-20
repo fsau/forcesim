@@ -49,7 +49,7 @@ initSystem(struct point_system *system)
 
 	for (int i = 0; i < (*system).particleN; i++)
 	{
-		(*system).Bodies[i].id = i;
+		(*system).Bodies[i].id = i+1;
 	}
 }
 
@@ -94,14 +94,8 @@ calc_system(struct point_system *mysystem, double dt)
 {
 	for(int i = 0; i < (*mysystem).particleN; i++)
 	{
-		if((*mysystem).Bodies[i].fixed)
-		{
-			i++;
-			continue;
-		}
-		
 		double force[dim] = {0};
-		
+
 		for(int j = 0; j < (*mysystem).particleN; j++)
 		{
 			for(int k = 0; k < (*mysystem).forceN; k++)
@@ -114,9 +108,12 @@ calc_system(struct point_system *mysystem, double dt)
 				(*mysystem).Modifiers[k](&(*mysystem).Bodies[i], &(*mysystem).Bodies[j]);
 			}
 		}
-		
-		sum_vec((*mysystem).Bodies[i].vel, (*mysystem).Bodies[i].vel, force, dt/(*mysystem).Bodies[i].mass);
-		sum_vec((*mysystem).Bodies[i].pos, (*mysystem).Bodies[i].pos, (*mysystem).Bodies[i].vel, dt);
+
+		if(!(*mysystem).Bodies[i].fixed)
+		{
+			sum_vec((*mysystem).Bodies[i].vel, (*mysystem).Bodies[i].vel, force, dt/(*mysystem).Bodies[i].mass);
+			sum_vec((*mysystem).Bodies[i].pos, (*mysystem).Bodies[i].pos, (*mysystem).Bodies[i].vel, dt);
+		}
 	}
 
 	(*mysystem).time += dt;
@@ -150,12 +147,17 @@ dynamic_dt(struct point_system system)
 			double vel = r_abs(system.Bodies[i].vel);
 			for (int j = 0; j < system.particleN; j++)
 			{
-				if(i == j) break;
-				double rad[dim], dist;
-				sum_vec(rad, system.Bodies[i].pos, system.Bodies[j].pos, -1);
-				dist = r_abs(rad);
-				if(dt0*dist/vel < dt)
-					dt = dt0*dist/vel;
+				if(i != j)
+				{
+					double rad[dim], dist;
+					sum_vec(rad, system.Bodies[i].pos, system.Bodies[j].pos, -1);
+					dist = r_abs(rad);
+					if(dt0*dist/vel < dt)
+					{
+						dt = dt0*dist/vel;
+					}
+				}
+				
 			}
 		}
 	}
