@@ -105,10 +105,9 @@ main(void)
 	printf("%d ", psystem.particleN);
 	print_system(psystem);
 
-	double dt = dynamic_dt(psystem);
 	for(; psystem.time < tmax;)
 	{
-		dt = dynamic_dt(psystem);
+		double dt = dynamic_dt(psystem);
 		calc_system(&psystem, dt);
 		print_system(psystem);
 	}
