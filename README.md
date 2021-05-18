@@ -1,3 +1,5 @@
+(ths repo was cloned from a previous [gist](https://gist.github.com/fsau/78f506ddc8434d4b896aaeb1c3e49f3b))
+
 # Arbitrary Particle Simulator
 
 ## What is this?
